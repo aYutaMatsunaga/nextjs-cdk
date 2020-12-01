@@ -16,7 +16,7 @@ export class NextjsCdkStack extends cdk.Stack {
       timeout: cdk.Duration.minutes(5),
       environment: {
         DEPLOY_BUCKET: bucket.bucketName,
-        SOURCE_URL: '',
+        SOURCE_URL: 'https://github.com/aYutaMatsunaga/nextjs-app/archive/main.zip',
       },
     })
 
