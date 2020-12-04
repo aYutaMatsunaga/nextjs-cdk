@@ -4,14 +4,14 @@ import * as path from 'path'
 
 const config = {
   s3BucketName: process.env.DEPLOY_BUCKET ?? '',
-  folderPath: './dist',
+  folderPath: './out',
 }
 
 const s3 = new aws.S3()
 
 const distFolderPath = path.join(__dirname, config.folderPath)
 
-fs.readdir(distFolderPath, (err, files) => {
+fs.readdir(distFolderPath, (_err, files) => {
   if (!files || files.length === 0) {
     console.log(`provided folder '${distFolderPath}' is empty or does not exist.`)
     console.log('Make sure your project was compiled!')

@@ -8,7 +8,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "deploy": "cdk deploy"
+    "clean": "rm -rf nextjs-app/node_modules/ nextjs-app/.next/ nextjs-app/out/",
+    "deploy": "yarn clean && cdk deploy"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.75.0",
