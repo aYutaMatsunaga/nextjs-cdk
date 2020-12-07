@@ -59,10 +59,10 @@ export class NextjsCdkStack extends cdk.Stack {
       this,
       "MyFargateService",
       {
-        cluster: cluster, // Required
+        cluster, // Required
         cpu: 512, // Default is 256
         desiredCount: 2, // Default is 1
-        taskDefinition: taskDefinition,
+        taskDefinition,
         memoryLimitMiB: 2048, // Default is 512
         publicLoadBalancer: true // Default is false
       }
