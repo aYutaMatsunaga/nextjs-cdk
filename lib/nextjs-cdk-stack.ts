@@ -4,25 +4,33 @@ import * as ec2 from '@aws-cdk/aws-ec2'
 import * as ecs from '@aws-cdk/aws-ecs'
 import * as iam from '@aws-cdk/aws-iam'
 import * as s3 from '@aws-cdk/aws-s3'
+import * as cloudfront from '@aws-cdk/aws-cloudfront'
 import * as ecs_patterns from '@aws-cdk/aws-ecs-patterns'
 
 export class NextjsCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
-    new s3.Bucket(this, 'nextjs-app', {
+    const bucket = new s3.Bucket(this, 'nextjs-app', {
+      versioned: false,
       bucketName: 'ufoo68-next-app',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      websiteErrorDocument: '404.html',
-      websiteIndexDocument: 'index.html',
-      publicReadAccess: true,
     })
+
+    const oai = new cloudfront.OriginAccessIdentity(
+      this,
+      "nextjs-on-ecs-cloudfront-oai",
+      {
+        comment: "s3 access."
+      }
+    );
+
+    bucket.grantRead(oai)
 
     const taskRole = new iam.Role(this, "fargate-test-task-role", {
       assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com")
     })
 
-    // Define a fargate task with the newly created execution and task roles
     const taskDefinition = new ecs.FargateTaskDefinition(
       this,
       "fargate-task-definition",
@@ -35,7 +43,7 @@ export class NextjsCdkStack extends cdk.Stack {
     const repository = new ecr.Repository(this, 'myRepoName', {
       repositoryName: 'ufoo68/hello-world',
     })
-    // Import a local docker image and set up logger
+
     const container = taskDefinition.addContainer(
       "fargate-test-task-container",
       {
@@ -52,29 +60,72 @@ export class NextjsCdkStack extends cdk.Stack {
       protocol: ecs.Protocol.TCP
     })
 
-    // NOTE: I've been creating a new VPC in us-east-2 (Ohio) to keep it clean, so se that at the top in stackProps
-    // Create a vpc to hold everything - this creates a brand new vpc
-    // Remove this if you are using us-east-1 and the existing non-prod vpc as commented out below
     const vpc = new ec2.Vpc(this, "fargate-test-task-vpc", {
       maxAzs: 2,
       natGateways: 1,
     })
 
-    // Create the cluster
     const cluster = new ecs.Cluster(this, "fargate-test-task-cluster", { vpc })
 
-    // Create a load-balanced Fargate service and make it public
-    new ecs_patterns.ApplicationLoadBalancedFargateService(
+    const fargate = new ecs_patterns.ApplicationLoadBalancedFargateService(
       this,
       "MyFargateService",
       {
-        cluster, // Required
-        cpu: 512, // Default is 256
-        desiredCount: 2, // Default is 1
+        cluster,
+        cpu: 512,
+        desiredCount: 2,
         taskDefinition,
-        memoryLimitMiB: 2048, // Default is 512
-        publicLoadBalancer: true // Default is false
+        memoryLimitMiB: 2048,
+        publicLoadBalancer: true,
       }
     )
+
+    const distribution = new cloudfront.CloudFrontWebDistribution(
+      this,
+      "nextjs-on-ecs-cloudfront",
+      {
+        defaultRootObject: "",
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.ALLOW_ALL,
+        originConfigs: [
+          {
+            s3OriginSource: {
+              s3BucketSource: bucket,
+              originAccessIdentity: oai
+            },
+            behaviors: [
+              {
+                pathPattern: "/_next/static/*",
+                compress: true
+              }
+            ]
+          },
+          {
+            customOriginSource: {
+              domainName: fargate.loadBalancer.loadBalancerDnsName,
+              originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+            },
+            behaviors: [
+              {
+                isDefaultBehavior: true,
+                allowedMethods: cloudfront.CloudFrontAllowedMethods.ALL,
+                forwardedValues: {
+                  queryString: true,
+                  cookies: {
+                    forward: "all"
+                  }
+                },
+                maxTtl: cdk.Duration.seconds(0),
+                minTtl: cdk.Duration.seconds(0),
+                defaultTtl: cdk.Duration.seconds(0)
+              }
+            ]
+          }
+        ]
+      }
+    )
+
+    new cdk.CfnOutput(this, 'cloudfrontUrl', {
+      value: `https://${distribution.distributionDomainName}`
+    })
   }
 }
