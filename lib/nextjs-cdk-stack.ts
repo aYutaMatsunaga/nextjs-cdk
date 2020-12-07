@@ -3,11 +3,20 @@ import * as ecr from '@aws-cdk/aws-ecr'
 import * as ec2 from '@aws-cdk/aws-ec2'
 import * as ecs from '@aws-cdk/aws-ecs'
 import * as iam from '@aws-cdk/aws-iam'
+import * as s3 from '@aws-cdk/aws-s3'
 import * as ecs_patterns from '@aws-cdk/aws-ecs-patterns'
 
 export class NextjsCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
+
+    new s3.Bucket(this, 'nextjs-app', {
+      bucketName: 'ufoo68-next-app',
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      websiteErrorDocument: '404.html',
+      websiteIndexDocument: 'index.html',
+      publicReadAccess: true,
+    })
 
     const taskRole = new iam.Role(this, "fargate-test-task-role", {
       assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com")
