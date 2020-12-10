@@ -6,6 +6,7 @@ import * as iam from '@aws-cdk/aws-iam'
 import * as s3 from '@aws-cdk/aws-s3'
 import * as cloudfront from '@aws-cdk/aws-cloudfront'
 import * as ecs_patterns from '@aws-cdk/aws-ecs-patterns'
+import { v4 as uuidv4 } from 'uuid'
 
 export class NextjsCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -69,7 +70,7 @@ export class NextjsCdkStack extends cdk.Stack {
 
     const fargate = new ecs_patterns.ApplicationLoadBalancedFargateService(
       this,
-      "MyFargateService",
+      `MyFargateService-${uuidv4()}`,
       {
         cluster,
         cpu: 512,
@@ -95,7 +96,10 @@ export class NextjsCdkStack extends cdk.Stack {
             behaviors: [
               {
                 pathPattern: "/_next/static/*",
-                compress: true
+                compress: true,
+                maxTtl: cdk.Duration.seconds(0),
+                minTtl: cdk.Duration.seconds(0),
+                defaultTtl: cdk.Duration.seconds(0),
               }
             ]
           },
@@ -116,7 +120,7 @@ export class NextjsCdkStack extends cdk.Stack {
                 },
                 maxTtl: cdk.Duration.seconds(0),
                 minTtl: cdk.Duration.seconds(0),
-                defaultTtl: cdk.Duration.seconds(0)
+                defaultTtl: cdk.Duration.seconds(0),
               }
             ]
           }
