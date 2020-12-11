@@ -9,6 +9,8 @@ import * as ecs_patterns from '@aws-cdk/aws-ecs-patterns'
 import { v4 as uuidv4 } from 'uuid'
 
 export class NextjsCdkStack extends cdk.Stack {
+  public readonly urlOutput: cdk.CfnOutput
+  
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
@@ -128,7 +130,7 @@ export class NextjsCdkStack extends cdk.Stack {
       }
     )
 
-    new cdk.CfnOutput(this, 'cloudfrontUrl', {
+    this.urlOutput = new cdk.CfnOutput(this, 'cloudfrontUrl', {
       value: `https://${distribution.distributionDomainName}`
     })
   }
