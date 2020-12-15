@@ -5,10 +5,6 @@ import { CdkPipeline, SimpleSynthAction, ShellScriptAction } from '@aws-cdk/pipe
 import { NextjsStageStack } from './nextjs-stage-stack'
 
 SecretValue.secretsManager
-
-/**
- * The stack that defines the application pipeline
- */
 export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
@@ -17,10 +13,8 @@ export class PipelineStack extends Stack {
     const cloudAssemblyArtifact = new codepipeline.Artifact()
  
     const pipeline = new CdkPipeline(this, 'Pipeline', {
-      // The pipeline name
       pipelineName: 'MyServicePipeline',
       cloudAssemblyArtifact,
-      // Where the source can be found
       sourceAction: new codepipeline_actions.GitHubSourceAction({
         actionName: 'GitHub',
         output: sourceArtifact,
@@ -30,50 +24,27 @@ export class PipelineStack extends Stack {
         owner: 'aYutaMatsunaga',
         repo: 'nextjs-cdk',
       }),
-
-       // How it will be built and synthesized
        synthAction: SimpleSynthAction.standardNpmSynth({
          sourceArtifact,
          cloudAssemblyArtifact,
-         
-         // We need a build step to compile the TypeScript Lambda
          buildCommand: 'npm run build',
        }),
     })
 
-    // This is where we add the application stages
     const preprod = new NextjsStageStack(this, 'PreProd')
     const preprodStage = pipeline.addApplicationStage(preprod)
     preprodStage.addActions(new ShellScriptAction({
       actionName: 'TestService',
       useOutputs: {
-        // Get the stack Output from the Stage and make it available in
-        // the shell script as $ENDPOINT_URL.
         ENDPOINT_URL: pipeline.stackOutput(preprod.urlOutput),
-        REPOSITORY_NAME: pipeline.stackOutput(preprod.repositoryNameOutput),
-        BUCKET_NAME: pipeline.stackOutput(preprod.bucketNameOutput)
       },
       commands: [
-        // Use 'curl' to GET the given URL and fail if it returns an error
         'curl -Ssf $ENDPOINT_URL',
       ],
     }))
+
+    preprodStage.addManualApprovalAction()
     const prod = new NextjsStageStack(this, 'Prod')
-    const prodStage = pipeline.addApplicationStage(prod)
-    prodStage.addManualApprovalAction()
-    prodStage.addActions(new ShellScriptAction({
-      actionName: 'TestService',
-      useOutputs: {
-        // Get the stack Output from the Stage and make it available in
-        // the shell script as $ENDPOINT_URL.
-        ENDPOINT_URL: pipeline.stackOutput(prod.urlOutput),
-        REPOSITORY_NAME: pipeline.stackOutput(prod.repositoryNameOutput),
-        BUCKET_NAME: pipeline.stackOutput(prod.bucketNameOutput)
-      },
-      commands: [
-        // Use 'curl' to GET the given URL and fail if it returns an error
-        'curl -Ssf $ENDPOINT_URL',
-      ],
-    }))
+    pipeline.addApplicationStage(prod)
   }
 }

@@ -10,13 +10,11 @@ import { v4 as uuidv4 } from 'uuid'
 
 export class NextjsCdkStack extends cdk.Stack {
   public readonly urlOutput: cdk.CfnOutput
-  public readonly repositoryNameOutput: cdk.CfnOutput
-  public readonly bucketNameOutput: cdk.CfnOutput
   
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
-    const bucket = new s3.Bucket(this, 'nextjs-app', {
+    const bucket = new s3.Bucket(this, 'nextjsApp', {
       versioned: false,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
@@ -31,7 +29,7 @@ export class NextjsCdkStack extends cdk.Stack {
 
     bucket.grantRead(oai)
 
-    const taskRole = new iam.Role(this, "fargate-test-task-role", {
+    const taskRole = new iam.Role(this, "fargateTaskRole", {
       assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com")
     })
 
@@ -62,12 +60,12 @@ export class NextjsCdkStack extends cdk.Stack {
       protocol: ecs.Protocol.TCP
     })
 
-    const vpc = new ec2.Vpc(this, "fargate-test-task-vpc", {
+    const vpc = new ec2.Vpc(this, "fargateTestTaskVpc", {
       maxAzs: 2,
       natGateways: 1,
     })
 
-    const cluster = new ecs.Cluster(this, "fargate-test-task-cluster", { vpc })
+    const cluster = new ecs.Cluster(this, "fargateTestTaskCluster", { vpc })
 
     const fargate = new ecs_patterns.ApplicationLoadBalancedFargateService(
       this,
@@ -84,7 +82,7 @@ export class NextjsCdkStack extends cdk.Stack {
 
     const distribution = new cloudfront.CloudFrontWebDistribution(
       this,
-      "nextjs-on-ecs-cloudfront",
+      "nextjsOnEcsCloudfront",
       {
         defaultRootObject: "",
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.ALLOW_ALL,
@@ -131,12 +129,6 @@ export class NextjsCdkStack extends cdk.Stack {
 
     this.urlOutput = new cdk.CfnOutput(this, 'cloudfrontUrl', {
       value: `https://${distribution.distributionDomainName}`
-    })
-    this.repositoryNameOutput = new cdk.CfnOutput(this, 'repositoryName', {
-      value: repository.repositoryName,
-    })
-    this.bucketNameOutput = new cdk.CfnOutput(this, 'bucketName', {
-      value: bucket.bucketName,
     })
   }
 }
