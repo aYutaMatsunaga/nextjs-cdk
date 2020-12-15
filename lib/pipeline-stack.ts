@@ -51,6 +51,24 @@ export class PipelineStack extends Stack {
         // the shell script as $ENDPOINT_URL.
         ENDPOINT_URL: pipeline.stackOutput(preprod.urlOutput),
         REPOSITORY_NAME: pipeline.stackOutput(preprod.repositoryNameOutput),
+        BUCKET_NAME: pipeline.stackOutput(preprod.bucketNameOutput)
+      },
+      commands: [
+        // Use 'curl' to GET the given URL and fail if it returns an error
+        'curl -Ssf $ENDPOINT_URL',
+      ],
+    }))
+    const prod = new NextjsStageStack(this, 'Prod')
+    const prodStage = pipeline.addApplicationStage(prod)
+    prodStage.addManualApprovalAction()
+    prodStage.addActions(new ShellScriptAction({
+      actionName: 'TestService',
+      useOutputs: {
+        // Get the stack Output from the Stage and make it available in
+        // the shell script as $ENDPOINT_URL.
+        ENDPOINT_URL: pipeline.stackOutput(preprod.urlOutput),
+        REPOSITORY_NAME: pipeline.stackOutput(preprod.repositoryNameOutput),
+        BUCKET_NAME: pipeline.stackOutput(preprod.bucketNameOutput)
       },
       commands: [
         // Use 'curl' to GET the given URL and fail if it returns an error

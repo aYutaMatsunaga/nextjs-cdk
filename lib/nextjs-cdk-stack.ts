@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid'
 export class NextjsCdkStack extends cdk.Stack {
   public readonly urlOutput: cdk.CfnOutput
   public readonly repositoryNameOutput: cdk.CfnOutput
+  public readonly bucketNameOutput: cdk.CfnOutput
   
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
@@ -133,6 +134,9 @@ export class NextjsCdkStack extends cdk.Stack {
     })
     this.repositoryNameOutput = new cdk.CfnOutput(this, 'repositoryName', {
       value: repository.repositoryName,
+    })
+    this.bucketNameOutput = new cdk.CfnOutput(this, 'bucketName', {
+      value: bucket.bucketName,
     })
   }
 }

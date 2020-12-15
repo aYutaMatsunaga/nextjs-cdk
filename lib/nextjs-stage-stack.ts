@@ -7,6 +7,7 @@ import { NextjsCdkStack } from './nextjs-cdk-stack'
 export class NextjsStageStack extends Stage {
     public readonly urlOutput: CfnOutput
     public readonly repositoryNameOutput: CfnOutput
+    public readonly bucketNameOutput: CfnOutput
   
     constructor(scope: Construct, id: string, props?: StageProps) {
     super(scope, id, props)
@@ -14,5 +15,6 @@ export class NextjsStageStack extends Stage {
         const service = new NextjsCdkStack(this, 'WebService')
         this.urlOutput = service.urlOutput
         this.repositoryNameOutput = service.repositoryNameOutput
+        this.bucketNameOutput = service.bucketNameOutput
     }
 }
