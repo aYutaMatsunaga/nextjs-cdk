@@ -33,17 +33,8 @@ export class PipelineStack extends Stack {
 
     const preprod = new NextjsStageStack(this, 'PreProd')
     const preprodStage = pipeline.addApplicationStage(preprod)
-    preprodStage.addActions(new ShellScriptAction({
-      actionName: 'TestService',
-      useOutputs: {
-        ENDPOINT_URL: pipeline.stackOutput(preprod.urlOutput),
-      },
-      commands: [
-        'curl -Ssf $ENDPOINT_URL',
-      ],
-    }))
-
     preprodStage.addManualApprovalAction()
+
     const prod = new NextjsStageStack(this, 'Prod')
     pipeline.addApplicationStage(prod)
   }
