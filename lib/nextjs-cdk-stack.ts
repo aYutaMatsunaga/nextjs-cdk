@@ -16,7 +16,6 @@ export class NextjsCdkStack extends cdk.Stack {
 
     const bucket = new s3.Bucket(this, 'nextjs-app', {
       versioned: false,
-      bucketName: 'ufoo68-next-app',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
