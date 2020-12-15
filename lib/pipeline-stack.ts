@@ -56,8 +56,5 @@ export class PipelineStack extends Stack {
         'curl -Ssf $ENDPOINT_URL',
       ],
     }))
-    preprodStage.addManualApprovalAction()
-    const prod = new NextjsStageStack(this, 'Prod')
-    pipeline.addApplicationStage(prod)
   }
 }
