@@ -37,7 +37,7 @@ export class PipelineStack extends Stack {
          cloudAssemblyArtifact,
          
          // We need a build step to compile the TypeScript Lambda
-         buildCommand: 'npm run build'
+         buildCommand: 'npm run build',
        }),
     })
 
@@ -50,6 +50,7 @@ export class PipelineStack extends Stack {
         // Get the stack Output from the Stage and make it available in
         // the shell script as $ENDPOINT_URL.
         ENDPOINT_URL: pipeline.stackOutput(preprod.urlOutput),
+        REPOSITORY_NAME: pipeline.stackOutput(preprod.repositoryNameOutput),
       },
       commands: [
         // Use 'curl' to GET the given URL and fail if it returns an error

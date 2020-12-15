@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 export class NextjsCdkStack extends cdk.Stack {
   public readonly urlOutput: cdk.CfnOutput
+  public readonly repositoryNameOutput: cdk.CfnOutput
   
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
@@ -42,9 +43,7 @@ export class NextjsCdkStack extends cdk.Stack {
       }
     )
 
-    const repository = new ecr.Repository(this, 'myRepoName', {
-      repositoryName: 'ufoo68/hello-world',
-    })
+    const repository = new ecr.Repository(this, 'myRepoName')
 
     const container = taskDefinition.addContainer(
       "fargate-test-task-container",
@@ -131,6 +130,9 @@ export class NextjsCdkStack extends cdk.Stack {
 
     this.urlOutput = new cdk.CfnOutput(this, 'cloudfrontUrl', {
       value: `https://${distribution.distributionDomainName}`
+    })
+    this.repositoryNameOutput = new cdk.CfnOutput(this, 'repositoryName', {
+      value: repository.repositoryName,
     })
   }
 }
