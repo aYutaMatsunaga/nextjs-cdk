@@ -7,9 +7,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
-    "clean": "rm -rf nextjs-app/node_modules/ nextjs-app/.next/ nextjs-app/out/",
-    "deploy": "yarn clean && cdk deploy"
+    "test": "jest"
   },
   "dependencies": {
     "@aws-cdk/aws-cloudfront": "1.75.0",
