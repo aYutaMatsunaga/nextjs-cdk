@@ -66,9 +66,9 @@ export class PipelineStack extends Stack {
       useOutputs: {
         // Get the stack Output from the Stage and make it available in
         // the shell script as $ENDPOINT_URL.
-        ENDPOINT_URL: pipeline.stackOutput(preprod.urlOutput),
-        REPOSITORY_NAME: pipeline.stackOutput(preprod.repositoryNameOutput),
-        BUCKET_NAME: pipeline.stackOutput(preprod.bucketNameOutput)
+        ENDPOINT_URL: pipeline.stackOutput(prod.urlOutput),
+        REPOSITORY_NAME: pipeline.stackOutput(prod.repositoryNameOutput),
+        BUCKET_NAME: pipeline.stackOutput(prod.bucketNameOutput)
       },
       commands: [
         // Use 'curl' to GET the given URL and fail if it returns an error
