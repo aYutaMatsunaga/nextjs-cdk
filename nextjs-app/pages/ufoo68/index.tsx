@@ -16,7 +16,7 @@ const WithServerSideProps = ({ ghUser }: Props) => (
 )
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const res = await fetch('https://api.github.com/users/ufoo68')
+  const res = await fetch('https://api.github.com/users/aYutaMatsunaga')
   const ghUser: GhUser = await res.json()
   return { props: { ghUser } }
 }
