@@ -34,3 +34,4 @@ yarn-error.log*
 .vercel
 deploy.dev.sh
 deploy.prod.sh
+login.sh
