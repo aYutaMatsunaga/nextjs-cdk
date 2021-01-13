@@ -11,7 +11,7 @@ export class PipelineStack extends Stack {
 
     const sourceArtifact = new codepipeline.Artifact()
     const cloudAssemblyArtifact = new codepipeline.Artifact()
- 
+
     const pipeline = new CdkPipeline(this, 'Pipeline', {
       pipelineName: 'MyServicePipeline',
       cloudAssemblyArtifact,
@@ -24,11 +24,11 @@ export class PipelineStack extends Stack {
         owner: 'aYutaMatsunaga',
         repo: 'nextjs-cdk',
       }),
-       synthAction: SimpleSynthAction.standardNpmSynth({
-         sourceArtifact,
-         cloudAssemblyArtifact,
-         buildCommand: 'npm run build',
-       }),
+      synthAction: SimpleSynthAction.standardNpmSynth({
+        sourceArtifact,
+        cloudAssemblyArtifact,
+        buildCommand: 'npm run build',
+      }),
     })
 
     const preprod = new NextjsStageStack(this, 'PreProd')
